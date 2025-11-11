@@ -1,0 +1,19 @@
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env/keys
+*.env
+*.env.*
+.env.local
+*.json.key
+*.sa.json
+
+# Build artifacts
+dist/
+.build/
