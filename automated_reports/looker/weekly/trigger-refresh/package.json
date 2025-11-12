@@ -1,0 +1,22 @@
+{
+  "name": "trigger-refresh",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Cloud Function to trigger jsm-puller Cloud Run Job",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && node dist/index.js"
+  },
+  "main": "dist/index.js",
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.3.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
