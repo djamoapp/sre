@@ -27,8 +27,10 @@ RUN npm ci --omit=dev
 # Copy compiled JavaScript from builder
 COPY --from=builder /app/dist ./dist
 
-# Ensure non-root ownership and drop privileges
+# Change ownership to node user for security
 RUN chown -R node:node /app
+
+# Drop privileges - run as non-root user
 USER node
 
 # Run the compiled code
