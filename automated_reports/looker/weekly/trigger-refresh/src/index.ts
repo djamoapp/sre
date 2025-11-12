@@ -31,6 +31,14 @@ function log(severity: string, message: string, data: LogData = {}): void {
   }));
 }
 
+// Validate ISO-8601 UTC timestamp (e.g., 2025-01-01T12:34:56Z or with fractional seconds)
+function isIso8601Z(value: string): boolean {
+  return /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$/.test(value);
+}
+
+// Strict identifier validation per request: lowercase letters, digits, and hyphens
+const IDENT_RE = /^[a-z0-9-]+$/;
+
 /* ---------------------------- Main Handler -------------------------------- */
 
 export default async (req: Request, res: Response): Promise<void> => {
@@ -61,6 +69,24 @@ export default async (req: Request, res: Response): Promise<void> => {
         hasJob: !!job
       });
       res.status(500).json({ error: "Server misconfiguration" });
+      return;
+    }
+
+    // Validate env var formats strictly
+    if (!IDENT_RE.test(project) || !IDENT_RE.test(region) || !IDENT_RE.test(job)) {
+      log("ERROR", "Invalid environment variable format", {
+        project,
+        region,
+        job
+      });
+      res.status(500).json({ error: "Server misconfiguration" });
+      return;
+    }
+
+    // Validate optional since parameter when provided
+    if (since && !isIso8601Z(since)) {
+      log("WARNING", "Invalid since parameter format", { since });
+      res.status(400).json({ error: "Invalid 'since'. Must be ISO-8601 UTC, e.g., 2025-01-01T00:00:00Z" });
       return;
     }
 

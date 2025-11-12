@@ -118,6 +118,15 @@ function env(name: string, fallback?: string): string | undefined {
   return process.env[name] ?? fallback;
 }
 
+// Validate ISO-8601 UTC timestamp (e.g., 2025-01-01T12:34:56Z or with fractional seconds)
+function isIso8601Z(value: string): boolean {
+  return /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?Z$/.test(value);
+}
+
+// Strict identifier validation to prevent SQL identifier injection
+// Per user request, allow only lowercase letters, digits, and hyphens
+const IDENT_RE = /^[a-z0-9-]+$/;
+
 async function getSecret(name: string): Promise<string> {
   const [v] = await secrets.accessSecretVersion({
     name: `projects/${process.env.GCP_PROJECT}/secrets/${name}/versions/latest`,
@@ -318,8 +327,24 @@ async function main(): Promise<void> {
     throw new Error("BQ_DATASET environment variable is required");
   }
 
+  // Validate identifiers strictly
+  if (!IDENT_RE.test(project)) {
+    throw new Error("Invalid GCP_PROJECT format. Expected ^[a-z0-9-]+$");
+  }
+  if (!IDENT_RE.test(dataset)) {
+    throw new Error("Invalid BQ_DATASET format. Expected ^[a-z0-9-]+$");
+  }
+
   const sinceEnv = env("SINCE", "");
-  const sinceIso = sinceEnv || new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  let sinceIso: string;
+  if (sinceEnv) {
+    if (!isIso8601Z(sinceEnv)) {
+      throw new Error("Invalid SINCE value. Must be ISO-8601 UTC (e.g., 2025-01-01T00:00:00Z)");
+    }
+    sinceIso = sinceEnv;
+  } else {
+    sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  }
 
   log("INFO", "Starting JSM puller", {
     project,
