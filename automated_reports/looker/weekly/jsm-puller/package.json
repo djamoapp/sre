@@ -1,0 +1,23 @@
+{
+  "name": "jsm-puller",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "JSM to BigQuery incremental data synchronization service",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.8.0",
+    "@google-cloud/secret-manager": "^5.6.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
